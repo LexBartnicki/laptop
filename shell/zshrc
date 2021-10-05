@@ -1,0 +1,96 @@
+#!/usr/bin/env zsh
+
+# arm64 or x86_64
+arch="$(uname -m)"
+
+if [ "$arch" = "arm64" ]; then
+  BREW="/opt/homebrew"
+else
+  BREW="/usr/local"
+fi
+
+# Aliases
+alias b="bundle"
+alias c="git create-branch"
+alias flush-cache="sudo killall -HUP mDNSResponder"
+alias m="rake db:migrate db:rollback && rake db:migrate db:test:prepare"
+alias mkdir="mkdir -p"
+alias path='echo $PATH | tr -s ":" "\n"'
+
+# Autocomplete branch names for git delete-branch
+function _git_delete_branch() {
+  __gitcomp "$(__git_heads)"
+}
+
+# Editor
+export VISUAL=vim
+export EDITOR=$VISUAL
+
+# History
+setopt hist_ignore_all_dups inc_append_history
+HISTFILE=~/.zhistory
+HISTSIZE=500
+SAVEHIST=500
+
+# Disable Homebrew analytics https://docs.brew.sh/Analytics
+unset HOMEBREW_NO_ANALYTICS
+
+# fzf for finding files, ag for searching files
+if [ -e "$BREW/opt/fzf/shell" ]; then
+  source "$BREW/opt/fzf/shell/completion.zsh"
+  source "$BREW/opt/fzf/shell/key-bindings.zsh"
+fi
+export FZF_DEFAULT_COMMAND='ag --hidden --nocolor -g ""'
+
+# Color
+autoload -U colors
+colors
+export CLICOLOR=1
+
+# Prompt
+function git_prompt_info() {
+  current_branch=$(git current-branch 2> /dev/null)
+  if [[ -n $current_branch ]]; then
+    echo " %{$fg_bold[green]%}$current_branch%{$reset_color%}"
+  fi
+}
+setopt promptsubst
+
+if ! env | grep -q '^PS1='; then
+  PS1='%{$fg_bold[blue]%}%c%{$reset_color%}$(git_prompt_info) %# '
+fi
+
+# Completion
+fpath=(~/.zsh $fpath)
+autoload -Uz compinit
+compinit -u
+
+# Set environment variables for monorepos
+export BLOG="$HOME/blog"
+export EDS="$HOME/EDS"
+export LAPTOP="$HOME/laptop"
+
+# Change into most common directories
+export CDPATH="$CDPATH:$HOME/src/github.com"
+
+# Prepend programming language binaries via ASDF shims
+PATH="$HOME/.asdf/bin:$PATH"
+PATH="$HOME/.asdf/shims:$PATH"
+
+# Prepend Deno binaries
+export DENO_INSTALL="$HOME/.deno"
+PATH="$DENO_INSTALL/bin:$PATH"
+
+# Prepend Homebrew binaries
+PATH="$BREW/bin:$PATH"
+
+# Prepend Postgres.app tools
+PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"
+
+# Prepend monorepo scripts
+PATH="$LAPTOP/bin:$PATH"
+
+# Prepend local project ./bin dirs
+PATH=".git/safe/../../bin:$PATH"
+
+export PATH

@@ -1,0 +1,53 @@
+[alias]
+  l = log --pretty=basic --no-merges
+  lt = log --pretty=time --no-merges
+  la = log --pretty=author --no-merges
+  lta = log --pretty=timeauthor --no-merges
+  aa = add --all
+  ap = add --patch
+  ci = commit -v
+  co = checkout
+  st = status
+[color]
+  ui = auto
+[commit]
+  template = ~/.gitmessage
+[core]
+  autocrlf = input
+  excludesfile = ~/.gitignore
+[credential]
+  helper = osxkeychain
+[diff]
+  noprefix = true
+  tool = vimdiff
+[diff "rspec"]
+  xfuncname = "^[ \t]*((RSpec|describe|context|it)[ \t].*)$"
+[fetch]
+  prune = true
+[github]
+  user = LexBartnicki
+[include]
+  path = ~/.gitconfig.local
+[merge]
+  ff = only
+  tool = vimdiff
+[mergetool "vimdiff"]
+  cmd = vimdiff -f $LOCAL $MERGED $REMOTE
+[pretty]
+  basic = format:%C(red)%h%C(reset) %s%C(reset)
+  time = format:%C(red)%h%C(reset) %C(blue)%cs%C(reset) %s%C(reset)
+  author = format:%C(red)%h%C(reset) %s %C(green)%an%C(reset)
+  timeauthor = format:%C(red)%h%C(reset) %C(blue)%cs%C(reset) %s %C(green)%an%C(reset)
+[push]
+  default = current
+[pull]
+  ff = only
+[rebase]
+  autosquash = true
+[rerere]
+  enabled = true
+[user]
+  name = Lex Bartnicki
+  email = lexb09@gmail.com
+[init]
+  defaultBranch = main
