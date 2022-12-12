@@ -77,6 +77,9 @@ export CDPATH="$CDPATH:$HOME/src/github.com"
 PATH="$HOME/.asdf/bin:$PATH"
 PATH="$HOME/.asdf/shims:$PATH"
 
+# Complete homebrew asdf installation
+. /usr/local/opt/asdf/libexec/asdf.sh
+
 # Prepend Deno binaries
 export DENO_INSTALL="$HOME/.deno"
 PATH="$DENO_INSTALL/bin:$PATH"

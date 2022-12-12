@@ -43,7 +43,6 @@ brew "gh"
 brew "git"
 brew "jq"
 brew "libyaml"
-brew "node"
 brew "openssl"
 brew "pgformatter"
 brew "shellcheck"
@@ -55,6 +54,7 @@ brew "vim"
 brew "watch"
 brew "zsh"
 cask "ngrok"
+cask "obs"
 EOF
 
 brew upgrade
@@ -143,7 +143,14 @@ if ! asdf plugin-list | grep -Fq "ruby"; then
 fi
 asdf plugin-update "ruby"
 asdf install ruby 2.7.4
-asdf install ruby 3.0.2
+asdf install ruby 3.1.2
+
+# Node
+if ! asdf plugin-list | grep -Fq "nodejs"; then
+  asdf plugin-add "nodejs" "https://github.com/asdf-vm/asdf-nodejs"
+fi
+asdf plugin-update "nodejs"
+asdf install nodejs 16.13.2
 
 # Vim
 if [ -e "$HOME/.vim/autoload/plug.vim" ]; then
