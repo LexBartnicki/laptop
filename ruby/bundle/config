@@ -1,2 +1,4 @@
 ---
 BUNDLE_JOBS: "3"
+BUNDLE_BUILD__RGEO: "--with-geos-dir='/usr/local/Cellar/geos/3.10.0'"
+BUNDLE_IGNORE_MESSAGES__HTTPARTY: "true"
