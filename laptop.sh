@@ -55,6 +55,7 @@ brew "watch"
 brew "zsh"
 cask "ngrok"
 cask "obs"
+cask "pgadmin4"
 EOF
 
 brew upgrade
@@ -126,14 +127,6 @@ esac
   ln -sf "$PWD/sql/psqlrc" "$HOME/.psqlrc"
 )
 
-# Deno
-curl -fsSL https://deno.land/x/install/install.sh | sh
-mkdir -p ~/.zsh
-deno completions zsh > ~/.zsh/_deno
-
-# Deno Deploy https://github.com/denoland/deployctl
-deno install --allow-read --allow-write --allow-env --allow-net --allow-run --no-check -r -f https://deno.land/x/deploy/deployctl.ts
-
 # ASDF
 export PATH="$BREW/opt/asdf/bin:$BREW/opt/asdf/shims:$PATH"
 
@@ -142,8 +135,7 @@ if ! asdf plugin-list | grep -Fq "ruby"; then
   asdf plugin-add "ruby" "https://github.com/asdf-vm/asdf-ruby"
 fi
 asdf plugin-update "ruby"
-asdf install ruby 2.7.4
-asdf install ruby 3.1.2
+asdf install ruby 3.2.2
 
 # Node
 if ! asdf plugin-list | grep -Fq "nodejs"; then
@@ -151,6 +143,20 @@ if ! asdf plugin-list | grep -Fq "nodejs"; then
 fi
 asdf plugin-update "nodejs"
 asdf install nodejs 16.13.2
+
+# Erlang
+if ! asdf plugin-list | grep -Fq "erlang"; then
+  asdf plugin-add "erlang" "https://github.com/asdf-vm/asdf-erlang"
+fi
+asdf plugin-update "erlang"
+asdf install erlang 25.2
+
+# Elixir
+if ! asdf plugin-list | grep -Fq "elixir"; then
+  asdf plugin-add "elixir" "https://github.com/asdf-vm/asdf-elixir"
+fi
+asdf plugin-update "elixir"
+asdf install elixir 1.14.3
 
 # Vim
 if [ -e "$HOME/.vim/autoload/plug.vim" ]; then
@@ -164,7 +170,7 @@ vim -u "$HOME/.vimrc" +PlugUpdate +PlugClean! +qa
 # Rust
 if ! command -v rustup &> /dev/null; then
   curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
-  source $HOME/.cargo/env
+  source "$HOME"/.cargo/env
 fi
 
 if ! command -v rustfmt &> /dev/null; then
