@@ -125,6 +125,9 @@ esac
   ln -sf "$PWD/shell/zshrc" "$HOME/.zshrc"
 
   ln -sf "$PWD/sql/psqlrc" "$HOME/.psqlrc"
+
+  mkdir -p "$HOME/.config/zellij"
+  ln -sf "$PWD/shell/zellij.kdl" "$HOME/.config/zellij/zellij.kdl"
 )
 
 # ASDF
@@ -135,7 +138,7 @@ if ! asdf plugin-list | grep -Fq "ruby"; then
   asdf plugin-add "ruby" "https://github.com/asdf-vm/asdf-ruby"
 fi
 asdf plugin-update "ruby"
-asdf install ruby 3.2.2
+asdf install ruby 3.3.1
 
 # Node
 if ! asdf plugin-list | grep -Fq "nodejs"; then
@@ -157,6 +160,13 @@ if ! asdf plugin-list | grep -Fq "elixir"; then
 fi
 asdf plugin-update "elixir"
 asdf install elixir 1.14.3
+
+# Python
+if ! asdf plugin-list | grep -Fq "python"; then
+  asdf plugin-add "python" "https://github.com/asdf-community/asdf-python"
+fi
+asdf plugin-update "python"
+asdf install python 3.12.2
 
 # Vim
 if [ -e "$HOME/.vim/autoload/plug.vim" ]; then
