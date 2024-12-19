@@ -89,6 +89,9 @@ call plug#begin('~/.vim/plugged')
   Plug 'mxw/vim-jsx'
   Plug 'pangloss/vim-javascript'
 
+  " Elixir
+  Plug 'elixir-editors/vim-elixir'
+
   " Rust
   Plug 'rust-lang/rust.vim'
 

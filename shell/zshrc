@@ -19,8 +19,7 @@ alias path='echo $PATH | tr -s ":" "\n"'
 
 # Autocomplete branch names for git delete-branch
 function _git_delete_branch() {
-  __gitcomp "$(__git_heads)"
-}
+  __gitcomp "$(__git_heads)" }
 
 # Editor
 export VISUAL=vim
@@ -94,3 +93,4 @@ PATH="$LAPTOP/bin:$PATH"
 PATH=".git/safe/../../bin:$PATH"
 
 export PATH
+export LOCAL_CODE_DIR="$HOME/Projects"
