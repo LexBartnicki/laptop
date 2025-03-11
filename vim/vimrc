@@ -58,11 +58,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'tpope/vim-projectionist'
 
   " Fuzzy-finding binary installed via Homebrew
-  if trim(system('uname -m')) == 'arm64'
-    Plug '/opt/homebrew/opt/fzf'
-  else
-    Plug '/usr/local/opt/fzf'
-  endif
+  Plug '/opt/homebrew/opt/fzf'
 
   " Fuzzy-finding :Ag, :Commits, :Files
   Plug 'junegunn/fzf.vim'
@@ -83,7 +79,6 @@ call plug#begin('~/.vim/plugged')
   Plug 'junegunn/vim-easy-align'
 
   " Frontend
-  Plug 'evanleck/vim-svelte'
   Plug 'jparise/vim-graphql'
   Plug 'leafgarland/typescript-vim'
   Plug 'mxw/vim-jsx'
@@ -127,7 +122,6 @@ let g:coc_global_extensions = [
   \ 'coc-html',
   \ 'coc-prettier',
   \ 'coc-rls',
-  \ 'coc-svelte',
   \ 'coc-tsserver'
   \ ]
 

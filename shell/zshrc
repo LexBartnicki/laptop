@@ -1,13 +1,6 @@
 #!/usr/bin/env zsh
 
-# arm64 or x86_64
-arch="$(uname -m)"
-
-if [ "$arch" = "arm64" ]; then
-  BREW="/opt/homebrew"
-else
-  BREW="/usr/local"
-fi
+BREW="/opt/homebrew"
 
 # Aliases
 alias b="bundle"
@@ -39,7 +32,7 @@ if [ -e "$BREW/opt/fzf/shell" ]; then
   source "$BREW/opt/fzf/shell/completion.zsh"
   source "$BREW/opt/fzf/shell/key-bindings.zsh"
 fi
-export FZF_DEFAULT_COMMAND='ag --hidden --nocolor -g ""'
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 
 # Color
 autoload -U colors
@@ -64,14 +57,8 @@ fpath=(~/.zsh $fpath)
 autoload -Uz compinit
 compinit -u
 
-# Set environment variables for monorepos
-export LAPTOP="$HOME/laptop"
-
 # Set local environment variables
 source "$LAPTOP/shell/zshrc.local"
-
-# Change into most common directories
-export CDPATH="$CDPATH:$HOME/src/github.com"
 
 # Prepend programming language binaries via ASDF shims
 PATH="$HOME/.asdf/bin:$PATH"
@@ -86,11 +73,14 @@ PATH="$BREW/bin:$PATH"
 # Prepend Postgres.app tools
 PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"
 
-# Prepend monorepo scripts
+# Laptop
+export LAPTOP="$HOME/laptop"
 PATH="$LAPTOP/bin:$PATH"
+
+# Code directory
+export LOCAL_CODE_DIR="$HOME/Projects"
 
 # Prepend local project ./bin dirs
 PATH=".git/safe/../../bin:$PATH"
 
 export PATH
-export LOCAL_CODE_DIR="$HOME/Projects"
