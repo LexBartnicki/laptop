@@ -15,19 +15,23 @@
 [core]
   autocrlf = input
   excludesfile = ~/.gitignore
+  ignorecase = false
 [credential]
   helper = osxkeychain
+[credential "https://github.com"]
+  helper = !/opt/homebrew/bin/gh auth git-credential
 [diff]
+  algorithm = histogram
   noprefix = true
   tool = vimdiff
 [diff "rspec"]
   xfuncname = "^[ \t]*((RSpec|describe|context|it)[ \t].*)$"
 [fetch]
   prune = true
-[github]
-  user = LexBartnicki
 [include]
   path = ~/.gitconfig.local
+[init]
+  defaultBranch = main
 [merge]
   ff = only
   tool = vimdiff
@@ -45,9 +49,5 @@
 [rebase]
   autosquash = true
 [rerere]
+  autoupdate = true
   enabled = true
-[user]
-  name = Lex Bartnicki
-  email = lexb09@gmail.com
-[init]
-  defaultBranch = main
