@@ -64,9 +64,6 @@ source "$LAPTOP/shell/zshrc.local"
 PATH="$HOME/.asdf/bin:$PATH"
 PATH="$HOME/.asdf/shims:$PATH"
 
-# Complete homebrew asdf installation
-. /usr/local/opt/asdf/libexec/asdf.sh
-
 # Prepend Homebrew binaries
 PATH="$BREW/bin:$PATH"
 
