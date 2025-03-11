@@ -12,6 +12,9 @@
 
 set -eux
 
+# Create local configs
+touch "$LAPTOP"/shell/zshrc.local
+
 # Homebrew
 BREW="/opt/homebrew"
 
@@ -23,7 +26,7 @@ export PATH="$BREW/bin:$PATH"
 
 brew analytics off
 brew update-reset
-brew bundle --no-lock --file=- <<EOF
+brew bundle --file=- <<EOF
 brew "asdf"
 brew "awscli"
 brew "bat"
@@ -130,32 +133,32 @@ esac
 export PATH="$BREW/opt/asdf/bin:$BREW/opt/asdf/shims:$PATH"
 
 # Ruby
-if ! asdf plugin-list | grep -Fq "ruby"; then
-  asdf plugin-add "ruby" "https://github.com/asdf-vm/asdf-ruby"
+if ! asdf plugin list | grep -Fq "ruby"; then
+  asdf plugin add "ruby" "https://github.com/asdf-vm/asdf-ruby"
 fi
-asdf plugin-update "ruby"
+asdf plugin update "ruby"
 asdf install ruby 3.3.1
 
 # Node
-if ! asdf plugin-list | grep -Fq "nodejs"; then
-  asdf plugin-add "nodejs" "https://github.com/asdf-vm/asdf-nodejs"
+if ! asdf plugin list | grep -Fq "nodejs"; then
+  asdf plugin add "nodejs" "https://github.com/asdf-vm/asdf-nodejs"
 fi
-asdf plugin-update "nodejs"
+asdf plugin update "nodejs"
 asdf install nodejs 16.13.2
 
 # Erlang
-if ! asdf plugin-list | grep -Fq "erlang"; then
-  asdf plugin-add "erlang" "https://github.com/asdf-vm/asdf-erlang"
-fi
-asdf plugin-update "erlang"
-asdf install erlang 25.2
+# if ! asdf plugin list | grep -Fq "erlang"; then
+#   asdf plugin add "erlang" "https://github.com/asdf-vm/asdf-erlang"
+# fi
+# asdf plugin update "erlang"
+# asdf install erlang 25.2
 
 # Elixir
-if ! asdf plugin-list | grep -Fq "elixir"; then
-  asdf plugin-add "elixir" "https://github.com/asdf-vm/asdf-elixir"
-fi
-asdf plugin-update "elixir"
-asdf install elixir 1.14.3
+# if ! asdf plugin list | grep -Fq "elixir"; then
+#   asdf plugin add "elixir" "https://github.com/asdf-vm/asdf-elixir"
+# fi
+# asdf plugin update "elixir"
+# asdf install elixir 1.14.3
 
 # Python
 uv python install 3.12.2
@@ -169,12 +172,3 @@ else
 fi
 vim -u "$HOME/.vimrc" +PlugUpdate +PlugClean! +qa
 
-# Rust
-if ! command -v rustup &> /dev/null; then
-  curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
-  source "$HOME"/.cargo/env
-fi
-
-if ! command -v rustfmt &> /dev/null; then
-  rustup component add rustfmt
-fi
