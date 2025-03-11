@@ -12,21 +12,11 @@
 
 set -eux
 
-# arm64 or x86_64
-arch="$(uname -m)"
-
 # Homebrew
-if [ "$arch" = "arm64" ]; then
-  BREW="/opt/homebrew"
-else
-  BREW="/usr/local"
-fi
+BREW="/opt/homebrew"
 
 if [ ! -d "$BREW" ]; then
-  sudo mkdir -p "$BREW"
-  sudo chflags norestricted "$BREW"
-  sudo chown -R "$LOGNAME:admin" "$BREW"
-  curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C "$BREW"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
 export PATH="$BREW/bin:$PATH"
@@ -34,31 +24,38 @@ export PATH="$BREW/bin:$PATH"
 brew analytics off
 brew update-reset
 brew bundle --no-lock --file=- <<EOF
-tap "homebrew/services"
 brew "asdf"
 brew "awscli"
 brew "bat"
+brew "fd"
 brew "fzf"
 brew "gh"
 brew "git"
 brew "jq"
 brew "libyaml"
-brew "openssl"
+brew "openssl@3"
 brew "pgformatter"
+brew "readline"
 brew "shellcheck"
 brew "the_silver_searcher"
 brew "tldr"
-brew "tmux"
 brew "tree"
+brew "uv"
 brew "vim"
 brew "watch"
+brew "yazi"
+brew "zellij"
 brew "zsh"
+
+cask "docker"
 cask "ngrok"
-cask "obs"
+cask "ollama"
 cask "pgadmin4"
+cask "warp"
 EOF
 
 brew upgrade
+brew autoremove
 brew cleanup
 
 # zsh
@@ -121,7 +118,6 @@ esac
 
   ln -sf "$PWD/shell/curlrc" "$HOME/.curlrc"
   ln -sf "$PWD/shell/hushlogin" "$HOME/.hushlogin"
-  ln -sf "$PWD/shell/tmux.conf" "$HOME/.tmux.conf"
   ln -sf "$PWD/shell/zshrc" "$HOME/.zshrc"
 
   ln -sf "$PWD/sql/psqlrc" "$HOME/.psqlrc"
@@ -162,11 +158,7 @@ asdf plugin-update "elixir"
 asdf install elixir 1.14.3
 
 # Python
-if ! asdf plugin-list | grep -Fq "python"; then
-  asdf plugin-add "python" "https://github.com/asdf-community/asdf-python"
-fi
-asdf plugin-update "python"
-asdf install python 3.12.2
+uv python install 3.12.2
 
 # Vim
 if [ -e "$HOME/.vim/autoload/plug.vim" ]; then
