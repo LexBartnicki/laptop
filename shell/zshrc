@@ -80,4 +80,5 @@ export LOCAL_CODE_DIR="$HOME/Projects"
 # Prepend local project ./bin dirs
 PATH=".git/safe/../../bin:$PATH"
 
+PATH="$HOME/.local/bin:$PATH"
 export PATH
