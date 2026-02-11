@@ -144,6 +144,10 @@ esac
   # Vim
   mkdir -p "$HOME/.config/nvim"
   ln -sf "$PWD/vim/init.lua" "$HOME/.config/nvim/init.lua"
+
+  # Claude
+  mkdir -p "$HOME/.claude"
+  cp "$PWD/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 )
 
 # ASDF
