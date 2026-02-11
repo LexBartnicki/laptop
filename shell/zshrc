@@ -4,18 +4,20 @@ BREW="/opt/homebrew"
 
 # Aliases
 alias b="bundle"
+alias ls="ls -lah"
 alias c="git create-branch"
 alias flush-cache="sudo killall -HUP mDNSResponder"
 alias m="rake db:migrate db:rollback && rake db:migrate db:test:prepare"
 alias mkdir="mkdir -p"
 alias path='echo $PATH | tr -s ":" "\n"'
+alias vim="nvim"
 
 # Autocomplete branch names for git delete-branch
 function _git_delete_branch() {
   __gitcomp "$(__git_heads)" }
 
 # Editor
-export VISUAL=vim
+export VISUAL=nvim
 export EDITOR=$VISUAL
 
 # History
