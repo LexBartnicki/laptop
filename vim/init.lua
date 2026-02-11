@@ -19,13 +19,14 @@ vim.opt.list = true
 vim.opt.listchars:append({ tab = "»·", trail = "·", nbsp = "·" })
 vim.opt.modeline = false -- Disable as a security precaution
 vim.opt.mouse = ""
-vim.opt.number = false
+vim.opt.number = true
+vim.opt.numberwidth = 1
 vim.opt.shell = "/opt/homebrew/bin/zsh"
 vim.opt.shiftround = true
 vim.opt.shiftwidth = 2
 vim.opt.shortmess:append("c")
 vim.opt.showcmd = true -- Display incomplete commands
-vim.opt.signcolumn = "no"
+vim.opt.signcolumn = "yes"
 vim.opt.splitbelow = true
 vim.opt.splitright = true
 vim.opt.swapfile = false
@@ -64,11 +65,34 @@ require("lazy").setup({
 	-- Treesitter
 	{
 		"nvim-treesitter/nvim-treesitter",
+		branch = "main",
 		build = ":TSUpdate",
+		config = function()
+			require("nvim-treesitter").setup({
+				ensure_installed = {
+					"bash",
+					"css",
+					"diff",
+					"go",
+					"html",
+					"javascript",
+					"json",
+					"lua",
+					"markdown",
+					"ruby",
+					"sql",
+					"typescript",
+					"vim",
+					"yaml",
+				},
+				auto_install = true,
+				highlight = { enable = true },
+				indent = { enable = true },
+			})
+		end,
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter-textobjects",
 			"RRethy/nvim-treesitter-endwise",
-			"nvim-treesitter/playground",
 		},
 	},
 
@@ -90,7 +114,11 @@ require("lazy").setup({
 	{ "tpope/vim-eunuch" },
 	{ "tpope/vim-fugitive" },
 
+	-- Comments
+	{ "tpope/vim-commentary" },
+
 	-- Alignment, auto pairs, auto tags
+	{ "junegunn/vim-easy-align" },
 	{ "alvan/vim-closetag" },
 	{ "windwp/nvim-autopairs" },
 
@@ -107,6 +135,16 @@ require("lazy").setup({
 	{ "vim-ruby/vim-ruby" },
 	{ "elixir-editors/vim-elixir" },
 	{ "rust-lang/rust.vim" },
+
+	-- Theme
+	{
+		"folke/tokyonight.nvim",
+		lazy = false,
+		priority = 1000,
+		opts = {
+			style = "night",
+		},
+	},
 
 	-- AI
 	{ "github/copilot.vim" },
@@ -136,23 +174,6 @@ local function run_file(key, cmd_template, split_cmd)
 		vim.cmd(split_cmd)
 		vim.cmd("terminal " .. cmd)
 	end, { buffer = 0 })
-end
-
-function _G.get_user()
-	-- Try to get GitHub username
-	local github_user = vim.fn.systemlist("git config --get github.user")[1] or ""
-	github_user = github_user:gsub("%s+", "")
-	if github_user ~= "" then
-		return "[" .. github_user .. "] "
-	end
-
-	-- Fall back to Unix username
-	local unix_user = os.getenv("USER") or os.getenv("USERNAME") or ""
-	if unix_user:match("^%w+$") then
-		return "[" .. unix_user .. "] "
-	else
-		return ""
-	end
 end
 
 -- Netrw
@@ -196,16 +217,20 @@ map("n", "<C-k>", "<C-w>k")
 map("n", "<C-h>", "<C-w>h")
 map("n", "<C-l>", "<C-w>l")
 
--- LSPs
-local lspconfig = require("lspconfig")
-local capabilities = require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())
-local on_attach = function(_, bufnr)
-	map("n", "gd", vim.lsp.buf.definition, { buffer = bufnr })
-	map("n", "gh", vim.lsp.buf.hover, { buffer = bufnr })
-	map("n", "gi", vim.lsp.buf.implementation, { buffer = bufnr })
-	map("n", "gn", vim.lsp.buf.rename, { buffer = bufnr })
-	map("n", "gr", vim.lsp.buf.references, { buffer = bufnr })
-end
+-- LSP keymaps (applied to all LSP buffers)
+vim.api.nvim_create_autocmd("LspAttach", {
+	callback = function(args)
+		local bufnr = args.buf
+		map("n", "gd", vim.lsp.buf.definition, { buffer = bufnr })
+		map("n", "gh", vim.lsp.buf.hover, { buffer = bufnr })
+		map("n", "gi", vim.lsp.buf.implementation, { buffer = bufnr })
+		map("n", "gn", vim.lsp.buf.rename, { buffer = bufnr })
+		map("n", "gr", vim.lsp.buf.references, { buffer = bufnr })
+	end,
+})
+
+-- LSP capabilities for completion
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 -- Terminal
 vim.api.nvim_set_keymap("t", "<Esc>", "<C-\\><C-n>", { noremap = true })
@@ -257,10 +282,8 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 })
 
 -- Bash
-lspconfig.bashls.setup({
-	capabilities = capabilities,
-	on_attach = on_attach,
-})
+vim.lsp.config("bashls", { capabilities = capabilities })
+vim.lsp.enable("bashls")
 
 -- Gitcommit
 vim.api.nvim_create_autocmd("FileType", {
@@ -273,10 +296,8 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- Go
-lspconfig.gopls.setup({
-	capabilities = capabilities,
-	on_attach = on_attach,
-})
+vim.lsp.config("gopls", { capabilities = capabilities })
+vim.lsp.enable("gopls")
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "go",
 	callback = function()
@@ -309,10 +330,8 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- HTML
-lspconfig.html.setup({
-	capabilities = capabilities,
-	on_attach = on_attach,
-})
+vim.lsp.config("html", { capabilities = capabilities })
+vim.lsp.enable("html")
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "html",
 	callback = function()
@@ -322,9 +341,8 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- Lua
-lspconfig.lua_ls.setup({
+vim.lsp.config("lua_ls", {
 	capabilities = capabilities,
-	on_attach = on_attach,
 	settings = {
 		Lua = {
 			runtime = { version = "LuaJIT", path = vim.split(package.path, ";") },
@@ -339,6 +357,7 @@ lspconfig.lua_ls.setup({
 		},
 	},
 })
+vim.lsp.enable("lua_ls")
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "lua",
 	callback = function()
@@ -382,11 +401,11 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- Ruby
-lspconfig.solargraph.setup({
+vim.lsp.config("solargraph", {
 	capabilities = capabilities,
-	on_attach = on_attach,
 	settings = { solargraph = { diagnostics = false } },
 })
+vim.lsp.enable("solargraph")
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "ruby",
 	callback = function()
@@ -460,10 +479,8 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- TypeScript
-lspconfig.ts_ls.setup({
-	on_attach = on_attach,
-	capabilities = capabilities,
-})
+vim.lsp.config("ts_ls", { capabilities = capabilities })
+vim.lsp.enable("ts_ls")
 vim.g.markdown_fenced_languages = { "ts=typescript" }
 
 -- Completion
@@ -481,123 +498,9 @@ cmp.setup({
 })
 
 -- Status line
-vim.opt.statusline = "%{v:lua.get_user()}%f %h%m%r%=%-14.(%l,%c%V%) %P"
+vim.opt.statusline = "%f %h%m%r%=%-14.(%l,%c%V%) %P"
 
--- Treesitter
-require("nvim-treesitter.configs").setup({
-	ensure_installed = {
-		"bash",
-		"css",
-		"diff",
-		"go",
-		"html",
-		"javascript",
-		"json",
-		"lua",
-		"markdown",
-		"ruby",
-		"sql",
-		"typescript",
-		"vim",
-		"yaml",
-	},
-	auto_install = true,
+-- Treesitter configured via lazy.nvim opts above
 
-	-- Delegate most syntax highlighting to Treesitter
-	-- https://neovim.io/doc/user/treesitter.html#treesitter-highlight
-	highlight = { enable = true },
-
-	incremental_selection = { enable = true },
-	textobjects = { enable = true },
-	endwise = { enable = true },
-	playground = {
-		enable = true,
-		disable = {},
-		updatetime = 25,
-		persist_queries = false,
-		keybindings = {
-			toggle_query_editor = "o",
-			toggle_hl_groups = "i",
-			toggle_injected_languages = "t",
-			toggle_anonymous_nodes = "a",
-			toggle_language_display = "I",
-			focus_language = "f",
-			unfocus_language = "F",
-			update = "R",
-			goto_node = "<cr>",
-			show_help = "?",
-		},
-	},
-})
-
--- Custom syntax highlighting after Treesitter
--- :TSHighlightCapturesUnderCursor
--- :so $VIMRUNTIME/syntax/hitest.vim
-vim.cmd([[hi clear]])
-
-if vim.fn.exists("syntax_on") then
-	vim.cmd([[syntax reset]])
-end
-
-vim.cmd([[
-hi Normal                               guibg=#191e2d " Sync w/ shell/ghostty
-hi StatusLine            guifg=#191e2d
-
-" White
-hi @attribute            guifg=#ffffff
-hi Identifier            guifg=#ffffff
-hi Keyword               guifg=#ffffff
-
-" Light gray
-hi Comment               guifg=#999999
-hi Cursor                guifg=#999999
-hi Ignore                guifg=#999999
-hi LineNr                guifg=#999999
-hi NonText               guifg=#999999
-hi Operator              guifg=#999999
-hi PmenuSel              guifg=#ffffff  guibg=#999999
-hi PmenuThumb            guifg=#ffffff  guibg=#999999
-hi Special               guifg=#999999
-hi StatusLineNC          guifg=#999999
-hi TabLine               guifg=#ffffff  guibg=#999999
-hi VertSplit             guifg=#999999
-
-" Yellow
-hi DiagnosticWarn        guifg=#ffd080
-hi RedrawDebugClear      guifg=#ffd080  guibg=#191e2d
-hi Search                               guibg=#ffd080
-hi String                guifg=#ffd080
-hi Type                  guifg=#ffd080
-hi WildMenu                             guibg=#d7005f
-
-" Purple
-hi @conditional          guifg=#9664c8
-hi Directory             guifg=#9664c8
-hi Function              guifg=#9664c8
-hi PreProc               guifg=#9664c8
-hi hamlClass             guifg=#9664c8
-
-" Pink
-hi @diff.minus           guifg=#d7005f
-hi @symbol               guifg=#d7005f
-hi @text.diff.delete     guifg=#d7005f
-hi Boolean               guifg=#d7005f
-hi ColorColumn                          guibg=#d7005f
-hi Constant              guifg=#d7005f
-hi DiagnosticError       guifg=#d7005f
-hi DiffText                             guibg=#d7005f
-hi Error                                guibg=#d7005f
-hi ErrorMsg                             guibg=#d7005f
-hi Number                guifg=#d7005f
-hi NvimInternalError     guifg=#ffffff  guibg=#d7005f
-hi Pmenu                                guibg=#d7005f
-hi PreProc               guifg=#d7005f
-hi RedrawDebugRecompose                 guibg=#d7005f
-hi Statement             guifg=#d7005f
-hi Title                 guifg=#d7005f
-hi WarningMsg            guifg=#d7005f
-
-" Green
-hi @diff.plus            guifg=#64c88e
-hi @text.diff.add        guifg=#64c88e
-]])
+-- Theme
+vim.cmd.colorscheme("tokyonight")

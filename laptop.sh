@@ -1,19 +1,49 @@
 #!/bin/bash
 
-# ./laptop.sh
-
+# ./laptop.sh [--languages lang1,lang2,...]
+#
 # - installs system packages with Homebrew package manager
 # - changes shell to Z shell (zsh)
 # - creates symlinks for dotfiles to `$HOME`
-# - installs programming language runtimes
-# - installs or updates Vim plugins
-
+# - installs programming language runtimes via asdf
+# - installs or updates Neovim plugins
+#
 # This script can be safely run multiple times.
+#
+# Options:
+#   --languages   Comma-separated list of languages to install (overrides languages.local)
+#                 Available: dotnet, elixir, erlang, kfilt, nodejs, python, ruby
 
 set -eux
 
-# Create local configs
+# Parse arguments
+LANGUAGES_OVERRIDE=""
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --languages)
+      LANGUAGES_OVERRIDE="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# Create local configs if they don't exist
 touch "$LAPTOP"/shell/zshrc.local
+if [ ! -f "$LAPTOP/languages.local" ]; then
+  cat > "$LAPTOP/languages.local" << 'EOF'
+# Languages to install via asdf
+# One per line. Versions come from asdf/tool-versions
+# Available: dotnet, elixir, erlang, kfilt, nodejs, python, ruby
+
+nodejs
+python
+ruby
+EOF
+fi
 
 # Homebrew
 BREW="/opt/homebrew"
@@ -26,49 +56,7 @@ export PATH="$BREW/bin:$PATH"
 
 brew analytics off
 brew update-reset
-brew bundle --file=- <<EOF
-brew "asdf"
-brew "awscli"
-brew "bat"
-brew "fd"
-brew "fzf"
-brew "gh"
-brew "git"
-brew "gmp"
-brew "go"
-brew "helm"
-brew "jq"
-brew "libyaml"
-brew "lua-language-server"
-brew "neovim"
-brew "openssl@3"
-brew "pgformatter"
-brew "postgresql"
-brew "readline"
-brew "ripgrep"
-brew "ruby-build"
-brew "rust"
-brew "shellcheck"
-brew "snyk-cli"
-brew "stylua"
-brew "the_silver_searcher"
-brew "tldr"
-brew "tree"
-brew "uv"
-brew "vim"
-brew "watch"
-brew "yarn"
-brew "yazi"
-brew "yq"
-brew "zellij"
-brew "zsh"
-
-cask "1password-cli"
-cask "ngrok"
-cask "pgadmin4"
-cask "warp"
-cask "visual-studio-code"
-EOF
+brew bundle --file="$LAPTOP/Brewfile"
 
 brew upgrade
 brew autoremove
@@ -122,6 +110,7 @@ esac
 
   mkdir -p "$HOME/.bundle"
   ln -sf "$PWD/ruby/bundle/config" "$HOME/.bundle/config"
+  ln -sf "$PWD/ruby/default-gems" "$HOME/.default-gems"
   ln -sf "$PWD/ruby/gemrc" "$HOME/.gemrc"
   ln -sf "$PWD/ruby/irbrc" "$HOME/.irbrc"
   ln -sf "$PWD/ruby/rspec" "$HOME/.rspec"
@@ -153,46 +142,59 @@ esac
 # ASDF
 export PATH="$BREW/opt/asdf/bin:$BREW/opt/asdf/shims:$PATH"
 
-# kfilt
-if ! asdf plugin list | grep -Fq "kfilt"; then
-  asdf plugin add "kfilt" "https://github.com/feniix/asdf-kfilt.git"
+# Determine which languages to install
+if [ -n "$LANGUAGES_OVERRIDE" ]; then
+  # Use CLI argument (comma-separated)
+  LANGUAGES=$(echo "$LANGUAGES_OVERRIDE" | tr ',' '\n')
+else
+  # Read from languages.local
+  LANGUAGES=$(grep -v '^#' "$LAPTOP/languages.local" | grep -v '^$')
 fi
-asdf plugin update "kfilt"
-asdf install kfilt 1.0.0
 
-# Ruby
-if ! asdf plugin list | grep -Fq "ruby"; then
-  asdf plugin add "ruby" "https://github.com/asdf-vm/asdf-ruby"
-fi
-asdf plugin update "ruby"
-asdf install ruby 3.3.9
+# Install each language
+install_language() {
+  local name="$1"
 
-# Node
-if ! asdf plugin list | grep -Fq "nodejs"; then
-  asdf plugin add "nodejs" "https://github.com/asdf-vm/asdf-nodejs"
-fi
-asdf plugin update "nodejs"
-asdf install nodejs 24.7.0
-# Erlang
-if ! asdf plugin list | grep -Fq "erlang"; then
-  asdf plugin add "erlang" "https://github.com/asdf-vm/asdf-erlang"
-fi
-asdf plugin update "erlang"
-#asdf install erlang 25.2
+  # Look up plugin info from languages.conf
+  local line
+  line=$(grep "^${name}|" "$LAPTOP/languages.conf" || true)
 
-# Elixir
-if ! asdf plugin list | grep -Fq "elixir"; then
-  asdf plugin add "elixir" "https://github.com/asdf-vm/asdf-elixir"
-fi
-asdf plugin update "elixir"
-#asdf install elixir 1.14.3
+  if [ -z "$line" ]; then
+    echo "Unknown language: $name (not in languages.conf)"
+    return 1
+  fi
 
-# Python
-if ! asdf plugin list | grep -Fq "python"; then
-  asdf plugin add "python" # "https://github.com/asdf-community/asdf-python"
-fi
-asdf plugin update "python"
-asdf install python 3.13.7
+  local plugin_name plugin_url
+  plugin_name=$(echo "$line" | cut -d'|' -f2)
+  plugin_url=$(echo "$line" | cut -d'|' -f3)
+
+  # Get version from tool-versions
+  local version
+  version=$(grep "^${plugin_name} " "$LAPTOP/asdf/tool-versions" | awk '{print $2}' || true)
+
+  if [ -z "$version" ]; then
+    echo "No version found for $plugin_name in asdf/tool-versions"
+    return 1
+  fi
+
+  echo "Installing $name ($plugin_name $version)..."
+
+  # Add plugin if not present
+  if ! asdf plugin list | grep -Fq "$plugin_name"; then
+    if [ -n "$plugin_url" ]; then
+      asdf plugin add "$plugin_name" "$plugin_url"
+    else
+      asdf plugin add "$plugin_name"
+    fi
+  fi
+
+  asdf plugin update "$plugin_name"
+  asdf install "$plugin_name" "$version"
+}
+
+for lang in $LANGUAGES; do
+  install_language "$lang"
+done
 
 # Vim
 # if [ -e "$HOME/.vim/autoload/plug.vim" ]; then
