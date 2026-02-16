@@ -1,0 +1,13 @@
+# shell
+command = /opt/homebrew/bin/zsh
+
+# match vim/init.lua
+# background = 1e2022
+
+# fonts
+font-feature = -calt
+font-feature = -dlig
+font-feature = -liga
+
+# windows
+window-inherit-working-directory = false

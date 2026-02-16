@@ -91,18 +91,18 @@ esac
   ln -sf "$PWD/asdf/asdfrc" "$HOME/.asdfrc"
   ln -sf "$PWD/asdf/tool-versions" "$HOME/.tool-versions"
 
-  # ln -sf "$PWD/vim/vimrc" "$HOME/.vimrc"
+  ln -sf "$PWD/vim/vimrc" "$HOME/.vimrc"
 
-  # mkdir -p "$HOME/.vim/ftdetect"
-  # mkdir -p "$HOME/.vim/ftplugin"
-  # mkdir -p "$HOME/.vim/syntax"
-  # (
-  #   cd vim
-  #   ln -sf "$PWD/coc-settings.json" "$HOME/.vim/coc-settings.json"
-  #   for f in {ftdetect,ftplugin,syntax}/*; do
-  #     ln -sf "$PWD/$f" "$HOME/.vim/$f"
-  #   done
-  # )
+  mkdir -p "$HOME/.vim/ftdetect"
+  mkdir -p "$HOME/.vim/ftplugin"
+  mkdir -p "$HOME/.vim/syntax"
+  (
+    cd vim
+    ln -sf "$PWD/coc-settings.json" "$HOME/.vim/coc-settings.json"
+    for f in {ftdetect,ftplugin,syntax}/*; do
+      ln -sf "$PWD/$f" "$HOME/.vim/$f"
+    done
+  )
 
   ln -sf "$PWD/git/gitconfig" "$HOME/.gitconfig"
   ln -sf "$PWD/git/gitignore" "$HOME/.gitignore"
@@ -127,12 +127,14 @@ esac
 
   ln -sf "$PWD/sql/psqlrc" "$HOME/.psqlrc"
 
+  mkdir -p "$HOME/.config/ghostty"
+  ln -sf "$PWD/term/ghostty" "$HOME/.config/ghostty/config"
   mkdir -p "$HOME/.config/zellij"
-  ln -sf "$PWD/shell/zellij.kdl" "$HOME/.config/zellij/zellij.kdl"
+  ln -sf "$PWD/term/zellij.kdl" "$HOME/.config/zellij/zellij.kdl"
 
   # Vim
-  mkdir -p "$HOME/.config/nvim"
-  ln -sf "$PWD/vim/init.lua" "$HOME/.config/nvim/init.lua"
+  # mkdir -p "$HOME/.config/nvim"
+  # ln -sf "$PWD/vim/init.lua" "$HOME/.config/nvim/init.lua"
 
   # Claude
   mkdir -p "$HOME/.claude"
@@ -197,13 +199,13 @@ for lang in $LANGUAGES; do
 done
 
 # Vim
-# if [ -e "$HOME/.vim/autoload/plug.vim" ]; then
-#   vim -u "$HOME/.vimrc" +PlugUpgrade +qa
-# else
-#   curl -fLo "$HOME/.vim/autoload/plug.vim" --create-dirs \
-#     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-# fi
-# vim -u "$HOME/.vimrc" +PlugUpdate +PlugClean! +qa
+if [ -e "$HOME/.vim/autoload/plug.vim" ]; then
+  vim -u "$HOME/.vimrc" +PlugUpgrade +qa
+else
+  curl -fLo "$HOME/.vim/autoload/plug.vim" --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+fi
+vim -u "$HOME/.vimrc" +PlugUpdate +PlugClean! +qa
 
 # Bash
 npm install -g bash-language-server
@@ -212,12 +214,12 @@ npm install -g bash-language-server
 npm install -g @anthropic-ai/claude-code
 
 # Neovim
-LAZY_DIR="$HOME/.local/share/nvim/lazy/lazy.nvim"
-if [ ! -d "$LAZY_DIR" ]; then
-  git clone --filter=blob:none https://github.com/folke/lazy.nvim.git "$LAZY_DIR"
-fi
+# LAZY_DIR="$HOME/.local/share/nvim/lazy/lazy.nvim"
+# if [ ! -d "$LAZY_DIR" ]; then
+#   git clone --filter=blob:none https://github.com/folke/lazy.nvim.git "$LAZY_DIR"
+# fi
 
-nvim --headless "+Lazy! sync" +qa
+# nvim --headless "+Lazy! sync" +qa
 
 # Go
 go install golang.org/x/tools/cmd/godoc@latest

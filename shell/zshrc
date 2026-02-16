@@ -10,14 +10,14 @@ alias flush-cache="sudo killall -HUP mDNSResponder"
 alias m="rake db:migrate db:rollback && rake db:migrate db:test:prepare"
 alias mkdir="mkdir -p"
 alias path='echo $PATH | tr -s ":" "\n"'
-alias vim="nvim"
+# alias vim="nvim"
 
 # Autocomplete branch names for git delete-branch
 function _git_delete_branch() {
   __gitcomp "$(__git_heads)" }
 
 # Editor
-export VISUAL=nvim
+export VISUAL=vim
 export EDITOR=$VISUAL
 
 # History

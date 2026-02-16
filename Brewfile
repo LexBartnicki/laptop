@@ -12,7 +12,8 @@ brew "ruby-build"
 brew "zsh"
 
 # Editors
-brew "neovim"
+# brew "neovim"
+brew "vim"
 
 # Git & GitHub
 brew "git"
@@ -70,6 +71,7 @@ brew "sdl2"
 # Casks
 cask "1password-cli"
 cask "docker-desktop"
+cask "ghostty"
 cask "ngrok"
 cask "pgadmin4"
 cask "visual-studio-code"
