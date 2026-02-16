@@ -27,10 +27,11 @@ vim.opt.shiftwidth = 2
 vim.opt.shortmess:append("c")
 vim.opt.showcmd = true -- Display incomplete commands
 vim.opt.signcolumn = "yes"
+vim.opt.smarttab = true
 vim.opt.splitbelow = true
 vim.opt.splitright = true
 vim.opt.swapfile = false
-vim.opt.tabstop = 2
+vim.opt.tabstop = 4
 vim.opt.textwidth = 80
 vim.opt.timeoutlen = 300
 vim.opt.updatetime = 300
@@ -65,34 +66,55 @@ require("lazy").setup({
 	-- Treesitter
 	{
 		"nvim-treesitter/nvim-treesitter",
+		lazy = false,
 		branch = "main",
 		build = ":TSUpdate",
 		config = function()
-			require("nvim-treesitter").setup({
-				ensure_installed = {
-					"bash",
-					"css",
-					"diff",
-					"go",
-					"html",
-					"javascript",
-					"json",
-					"lua",
-					"markdown",
-					"ruby",
-					"sql",
-					"typescript",
-					"vim",
-					"yaml",
-				},
-				auto_install = true,
-				highlight = { enable = true },
-				indent = { enable = true },
+			local langs = {
+				"bash",
+				"css",
+				"diff",
+				"go",
+				"html",
+				"javascript",
+				"json",
+				"lua",
+				"markdown",
+				"ruby",
+				"sql",
+				"typescript",
+				"vim",
+				"yaml",
+			}
+
+			require("nvim-treesitter").install(langs)
+
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = langs,
+				callback = function()
+					vim.treesitter.start()
+					vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+				end,
 			})
 		end,
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter-textobjects",
-			"RRethy/nvim-treesitter-endwise",
+			{
+				"RRethy/nvim-treesitter-endwise",
+				build = function()
+					-- Patch: guard against searchpos returning {0,0} on empty lines
+					local path = vim.fn.stdpath("data")
+						.. "/lazy/nvim-treesitter-endwise/lua/nvim-treesitter/endwise.lua"
+					local lines = vim.fn.readfile(path)
+					for i, line in ipairs(lines) do
+						if line:match("col = col %- 1") and not (lines[i + 1] or ""):match("if row < 0") then
+							table.insert(lines, i + 1, "    if row < 0 or col < 0 then return end")
+							vim.fn.writefile(lines, path)
+							break
+						end
+					end
+				end,
+			},
 		},
 	},
 
@@ -250,7 +272,7 @@ require("conform").setup({
 		json = { "prettier" }, -- prettier --parser json
 		lua = { "stylua" },
 		markdown = { "prettier" }, -- prettier --parser markdown
-		ruby = { "bundlerubocop" },
+		ruby = { "bundlerubocop", "rubocop", stop_after_first = true },
 		scss = { "prettier" }, -- prettier --parser scss
 		sh = { "shfmt" },
 		sql = { "pg_format" },
@@ -261,6 +283,22 @@ require("conform").setup({
 		bundlerubocop = {
 			command = "bundle",
 			args = { "exec", "rubocop", "--server", "-a", "-f", "quiet", "--stderr", "--stdin", "$FILENAME" },
+			condition = function(self, ctx)
+				local lockfile = vim.fn.findfile("Gemfile.lock", ctx.dirname .. ";")
+				if lockfile == "" then
+					return false
+				end
+				for _, line in ipairs(vim.fn.readfile(lockfile)) do
+					if line:find("rubocop ") then
+						return true
+					end
+				end
+				return false
+			end,
+		},
+		rubocop = {
+			command = "rubocop",
+			args = { "--server", "-a", "-f", "quiet", "--stderr", "--stdin", "$FILENAME" },
 		},
 		goimportslocal = {
 			command = "goimportslocal",
@@ -409,6 +447,7 @@ vim.lsp.enable("solargraph")
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "ruby",
 	callback = function()
+		vim.opt_local.indentkeys:remove(".")
 		run_file("<Leader>r", "bundle exec ruby %", "split")
 
 		map("n", "<Leader>i", function()

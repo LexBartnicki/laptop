@@ -30,6 +30,9 @@ brew "yazi"
 brew "go"
 brew "rust"
 
+# Treesitter
+brew "tree-sitter-cli"
+
 # Language servers & linters
 brew "lua-language-server"
 brew "pgformatter"
