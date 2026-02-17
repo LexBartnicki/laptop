@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ./laptop.sh [--languages lang1,lang2,...]
+# ./laptop.sh [--languages lang1,lang2,...] [--no-brew]
 #
 # - installs system packages with Homebrew package manager
 # - changes shell to Z shell (zsh)
@@ -13,16 +13,23 @@
 # Options:
 #   --languages   Comma-separated list of languages to install (overrides languages.local)
 #                 Available: dotnet, elixir, erlang, kfilt, nodejs, python, ruby
+#   --no-brew     Skip Homebrew install/update (for users sharing a machine where
+#                 another user owns Homebrew)
 
 set -eux
 
 # Parse arguments
 LANGUAGES_OVERRIDE=""
+SKIP_BREW=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     --languages)
       LANGUAGES_OVERRIDE="$2"
       shift 2
+      ;;
+    --no-brew)
+      SKIP_BREW=true
+      shift
       ;;
     *)
       echo "Unknown option: $1"
@@ -48,24 +55,29 @@ fi
 # Homebrew
 BREW="/opt/homebrew"
 
-if [ ! -d "$BREW" ]; then
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+if [ "$SKIP_BREW" = false ]; then
+  if [ ! -d "$BREW" ]; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+
+  brew analytics off
+  brew update-reset
+  brew bundle --file="$LAPTOP/Brewfile"
+
+  brew upgrade
+  brew autoremove
+  brew cleanup
 fi
 
 export PATH="$BREW/bin:$PATH"
 
-brew analytics off
-brew update-reset
-brew bundle --file="$LAPTOP/Brewfile"
-
-brew upgrade
-brew autoremove
-brew cleanup
-
 # zsh
 update_shell() {
-  sudo chown -R "$(whoami)" "$BREW/share/zsh" "$BREW/share/zsh/site-functions"
-  chmod u+w "$BREW/share/zsh" "$BREW/share/zsh/site-functions"
+  if [ "$SKIP_BREW" = false ]; then
+    sudo chown -R "$(whoami)" "$BREW/share/zsh" "$BREW/share/zsh/site-functions"
+    chmod u+w "$BREW/share/zsh" "$BREW/share/zsh/site-functions"
+  fi
+
   shellpath="$(command -v zsh)"
 
   if ! grep "$shellpath" /etc/shells > /dev/null 2>&1 ; then
