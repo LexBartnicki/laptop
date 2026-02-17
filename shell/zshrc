@@ -10,6 +10,7 @@ alias flush-cache="sudo killall -HUP mDNSResponder"
 alias m="rake db:migrate db:rollback && rake db:migrate db:test:prepare"
 alias mkdir="mkdir -p"
 alias path='echo $PATH | tr -s ":" "\n"'
+alias y='yazi'
 # alias vim="nvim"
 
 # Autocomplete branch names for git delete-branch
@@ -59,6 +60,10 @@ fpath=(~/.zsh $fpath)
 autoload -Uz compinit
 compinit -u
 
+# Laptop
+export LAPTOP="$HOME/laptop"
+PATH="$LAPTOP/bin:$PATH"
+
 # Set local environment variables
 source "$LAPTOP/shell/zshrc.local"
 
@@ -71,10 +76,6 @@ PATH="$BREW/bin:$PATH"
 
 # Prepend Postgres.app tools
 PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"
-
-# Laptop
-export LAPTOP="$HOME/laptop"
-PATH="$LAPTOP/bin:$PATH"
 
 # Code directory
 export LOCAL_CODE_DIR="$HOME/Projects"
