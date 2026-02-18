@@ -11,10 +11,12 @@ set -e
 
 if [ -n "$1" ]; then
   mkdir "$PWD/$1" && cd "$_"
-  bundle init > /dev/null 2>&1
+  bundle init
   bundle add rspec
+  bundle add rubocop --require=false
   bundle install
   bundle exec rspec --init
+  git init
 else
   exit 0
 fi

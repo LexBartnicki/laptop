@@ -219,11 +219,13 @@ else
 fi
 vim -u "$HOME/.vimrc" +PlugUpdate +PlugClean! +qa
 
-# Bash
-npm install -g bash-language-server
+if [ "$SKIP_BREW" = false ]; then
+  # Bash
+  npm install -g bash-language-server
 
-# Claude code
-npm install -g @anthropic-ai/claude-code
+  # Claude code
+  npm install -g @anthropic-ai/claude-code
+fi
 
 # Neovim
 # LAZY_DIR="$HOME/.local/share/nvim/lazy/lazy.nvim"
