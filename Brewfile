@@ -66,8 +66,12 @@ brew "yarn"
 brew "zellij"
 
 # Game development
+brew "assimp"
 brew "freeimage"
+brew "freetype"
 brew "sdl2"
+brew "wine-stable"
+brew "winetricks"
 
 # Casks
 cask "1password-cli"

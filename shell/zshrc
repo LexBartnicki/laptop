@@ -77,6 +77,11 @@ PATH="$BREW/bin:$PATH"
 # Prepend Postgres.app tools
 PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"
 
+# MonoGame shader compiler (Wine prefix)
+if [ -d "$HOME/.winemonogame" ]; then
+  export MGFXC_WINE_PATH="$HOME/.winemonogame"
+fi
+
 # Code directory
 export LOCAL_CODE_DIR="$HOME/Projects"
 

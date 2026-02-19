@@ -3,12 +3,19 @@
 # setup_monogame - Install MonoGame development tools
 #
 # Installs MonoGame templates, content pipeline tools,
-# and C# language server.
+# C# language server, fixes native library paths for
+# Apple Silicon, and sets up Wine for shader compilation.
+#
+# Prerequisites (via Brewfile):
+#   assimp, freeimage, freetype, sdl2, wine-stable, winetricks
 #
 # Usage:
 #   setup_monogame
 
 set -e
+
+BREW="/opt/homebrew"
+MGCB_NATIVE="$HOME/.nuget/packages/dotnet-mgcb/3.8.2.1105/tools/net8.0/any/runtimes/osx/native"
 
 echo "Installing MonoGame templates..."
 dotnet new install MonoGame.Templates.CSharp
@@ -23,4 +30,26 @@ dotnet tool update -g csharp-ls
 echo "Installing C# formatter..."
 dotnet tool update -g csharpier
 
+echo "Symlinking native libraries for MGCB on Apple Silicon..."
+if [ -d "$MGCB_NATIVE" ]; then
+  ln -sf "$BREW/lib/libfreeimage.dylib" "$MGCB_NATIVE/libFreeImage.dylib"
+  ln -sf "$BREW/lib/libfreetype.dylib" "$MGCB_NATIVE/libfreetype6.dylib"
+  ln -sf "$BREW/lib/libassimp.dylib" "$MGCB_NATIVE/libassimp.dylib"
+  echo "  Linked FreeImage, freetype, and assimp into MGCB native dir"
+else
+  echo "  Warning: MGCB native dir not found at $MGCB_NATIVE"
+  echo "  Run 'dotnet tool restore' in a MonoGame project first, then re-run this script."
+fi
+
+echo "Setting up Wine prefix for MGFXC shader compiler..."
+WINE_PREFIX="$HOME/.winemonogame"
+if [ ! -d "$WINE_PREFIX" ]; then
+  WINEPREFIX="$WINE_PREFIX" wine64 wineboot
+  WINEPREFIX="$WINE_PREFIX" winetricks d3dcompiler_47
+  echo "  Wine prefix created at $WINE_PREFIX"
+else
+  echo "  Wine prefix already exists at $WINE_PREFIX"
+fi
+
 echo "Done! Run 'new_monogame <name>' to create a project."
+echo "Set MGFXC_WINE_PATH=$WINE_PREFIX when building content with shaders."
