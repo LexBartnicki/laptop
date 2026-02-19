@@ -14,5 +14,8 @@ font-feature = -calt
 font-feature = -dlig
 font-feature = -liga
 
+# theme
+theme = Catppuccin Mocha
+
 # windows
 window-inherit-working-directory = false

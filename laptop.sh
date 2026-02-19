@@ -142,7 +142,7 @@ esac
   mkdir -p "$HOME/.config/ghostty"
   ln -sf "$PWD/term/ghostty" "$HOME/.config/ghostty/config"
   mkdir -p "$HOME/.config/zellij"
-  ln -sf "$PWD/term/zellij.kdl" "$HOME/.config/zellij/zellij.kdl"
+  ln -sf "$PWD/term/zellij.kdl" "$HOME/.config/zellij/config.kdl"
 
   # Vim
   # mkdir -p "$HOME/.config/nvim"
