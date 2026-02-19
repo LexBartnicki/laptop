@@ -93,6 +93,9 @@ call plug#begin('~/.vim/plugged')
   " Ruby
   Plug 'tpope/vim-rails'
   Plug 'vim-ruby/vim-ruby'
+
+  " Theme
+  Plug 'catppuccin/vim', { 'as': 'catppuccin' }
 call plug#end()
 
 " When reading a buffer, jump to last known cursor position except for
@@ -179,6 +182,8 @@ if version > 580
     syntax reset
   endif
 endif
+
+silent! colorscheme catppuccin_mocha
 
 " Show all syntax groups
 " :so $VIMRUNTIME/syntax/hitest.vim

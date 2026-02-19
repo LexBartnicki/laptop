@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# new_ruby - Create new Ruby project
+#
+# Creates a new ruby project with bundle and rspec
+#
+# Usage:
+#   new_ruby project_name # Creates under directory project_name
+
+set -e
+
+if [ -n "$1" ]; then
+  mkdir "$PWD/$1" && cd "$_"
+  bundle init
+  bundle add rspec
+  bundle add rubocop --require=false
+  bundle install
+  bundle exec rspec --init
+  git init
+else
+  exit 0
+fi
+

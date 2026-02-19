@@ -9,7 +9,7 @@ outside-in](https://thoughtbot.com/blog/testing-from-the-outsidein).
 You also try your best to follow strict OOP principles, keep methods and classes
 small (methods ideally under 5 lines of code), and optimizing for readability and understanding.
 
-# Testing and TDD
+## Testing and TDD
 
 When working on a new feature or a bug fix, you always write a failing test or series of
 tests first and then wait for me to review them.
@@ -18,6 +18,7 @@ Then, when I've approved those tests, you add the implementation to resolve one 
 tests. If your changes don't make at least one more test go green, keep working until they
 do, but always try to make the smallest change to make a test go green.
 
+### RSpec
 When testing with Ruby, we use RSpec. There are a couple rules we have for rspec
 best practices:
 - Do not test private methods
@@ -28,3 +29,11 @@ best practices:
 - Most importantly, we should be phrasing our tests as business logic because
   tests are documentation. Optimize for understanding. Read more
   [here](https://www.betterspecs.org/)
+
+### Rubocop
+Ideally our tests and code will follow linter best practices. But in case they
+don't, let's run rubocop on our code after writing it. This will give us an
+extra level of design pressure to ensure we're using best OOP practices.
+
+## Misc. Ruby instructions
+- Prefer Data over Struct where possible

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ./laptop.sh [--languages lang1,lang2,...]
+# ./laptop.sh [--languages lang1,lang2,...] [--no-brew]
 #
 # - installs system packages with Homebrew package manager
 # - changes shell to Z shell (zsh)
@@ -13,16 +13,23 @@
 # Options:
 #   --languages   Comma-separated list of languages to install (overrides languages.local)
 #                 Available: dotnet, elixir, erlang, kfilt, nodejs, python, ruby
+#   --no-brew     Skip Homebrew install/update (for users sharing a machine where
+#                 another user owns Homebrew)
 
 set -eux
 
 # Parse arguments
 LANGUAGES_OVERRIDE=""
+SKIP_BREW=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     --languages)
       LANGUAGES_OVERRIDE="$2"
       shift 2
+      ;;
+    --no-brew)
+      SKIP_BREW=true
+      shift
       ;;
     *)
       echo "Unknown option: $1"
@@ -48,24 +55,29 @@ fi
 # Homebrew
 BREW="/opt/homebrew"
 
-if [ ! -d "$BREW" ]; then
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+if [ "$SKIP_BREW" = false ]; then
+  if [ ! -d "$BREW" ]; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+
+  brew analytics off
+  brew update-reset
+  brew bundle --file="$LAPTOP/Brewfile"
+
+  brew upgrade
+  brew autoremove
+  brew cleanup
 fi
 
 export PATH="$BREW/bin:$PATH"
 
-brew analytics off
-brew update-reset
-brew bundle --file="$LAPTOP/Brewfile"
-
-brew upgrade
-brew autoremove
-brew cleanup
-
 # zsh
 update_shell() {
-  sudo chown -R "$(whoami)" "$BREW/share/zsh" "$BREW/share/zsh/site-functions"
-  chmod u+w "$BREW/share/zsh" "$BREW/share/zsh/site-functions"
+  if [ "$SKIP_BREW" = false ]; then
+    sudo chown -R "$(whoami)" "$BREW/share/zsh" "$BREW/share/zsh/site-functions"
+    chmod u+w "$BREW/share/zsh" "$BREW/share/zsh/site-functions"
+  fi
+
   shellpath="$(command -v zsh)"
 
   if ! grep "$shellpath" /etc/shells > /dev/null 2>&1 ; then
@@ -91,18 +103,18 @@ esac
   ln -sf "$PWD/asdf/asdfrc" "$HOME/.asdfrc"
   ln -sf "$PWD/asdf/tool-versions" "$HOME/.tool-versions"
 
-  # ln -sf "$PWD/vim/vimrc" "$HOME/.vimrc"
+  ln -sf "$PWD/vim/vimrc" "$HOME/.vimrc"
 
-  # mkdir -p "$HOME/.vim/ftdetect"
-  # mkdir -p "$HOME/.vim/ftplugin"
-  # mkdir -p "$HOME/.vim/syntax"
-  # (
-  #   cd vim
-  #   ln -sf "$PWD/coc-settings.json" "$HOME/.vim/coc-settings.json"
-  #   for f in {ftdetect,ftplugin,syntax}/*; do
-  #     ln -sf "$PWD/$f" "$HOME/.vim/$f"
-  #   done
-  # )
+  mkdir -p "$HOME/.vim/ftdetect"
+  mkdir -p "$HOME/.vim/ftplugin"
+  mkdir -p "$HOME/.vim/syntax"
+  (
+    cd vim
+    ln -sf "$PWD/coc-settings.json" "$HOME/.vim/coc-settings.json"
+    for f in {ftdetect,ftplugin,syntax}/*; do
+      ln -sf "$PWD/$f" "$HOME/.vim/$f"
+    done
+  )
 
   ln -sf "$PWD/git/gitconfig" "$HOME/.gitconfig"
   ln -sf "$PWD/git/gitignore" "$HOME/.gitignore"
@@ -127,12 +139,14 @@ esac
 
   ln -sf "$PWD/sql/psqlrc" "$HOME/.psqlrc"
 
+  mkdir -p "$HOME/.config/ghostty"
+  ln -sf "$PWD/term/ghostty" "$HOME/.config/ghostty/config"
   mkdir -p "$HOME/.config/zellij"
-  ln -sf "$PWD/shell/zellij.kdl" "$HOME/.config/zellij/zellij.kdl"
+  ln -sf "$PWD/term/zellij.kdl" "$HOME/.config/zellij/config.kdl"
 
   # Vim
-  mkdir -p "$HOME/.config/nvim"
-  ln -sf "$PWD/vim/init.lua" "$HOME/.config/nvim/init.lua"
+  # mkdir -p "$HOME/.config/nvim"
+  # ln -sf "$PWD/vim/init.lua" "$HOME/.config/nvim/init.lua"
 
   # Claude
   mkdir -p "$HOME/.claude"
@@ -197,27 +211,29 @@ for lang in $LANGUAGES; do
 done
 
 # Vim
-# if [ -e "$HOME/.vim/autoload/plug.vim" ]; then
-#   vim -u "$HOME/.vimrc" +PlugUpgrade +qa
-# else
-#   curl -fLo "$HOME/.vim/autoload/plug.vim" --create-dirs \
-#     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-# fi
-# vim -u "$HOME/.vimrc" +PlugUpdate +PlugClean! +qa
+if [ -e "$HOME/.vim/autoload/plug.vim" ]; then
+  vim -u "$HOME/.vimrc" +PlugUpgrade +qa
+else
+  curl -fLo "$HOME/.vim/autoload/plug.vim" --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+fi
+vim -u "$HOME/.vimrc" +PlugUpdate +PlugClean! +qa
 
-# Bash
-npm install -g bash-language-server
+if [ "$SKIP_BREW" = false ]; then
+  # Bash
+  npm install -g bash-language-server
 
-# Claude code
-npm install -g @anthropic-ai/claude-code
-
-# Neovim
-LAZY_DIR="$HOME/.local/share/nvim/lazy/lazy.nvim"
-if [ ! -d "$LAZY_DIR" ]; then
-  git clone --filter=blob:none https://github.com/folke/lazy.nvim.git "$LAZY_DIR"
+  # Claude code
+  npm install -g @anthropic-ai/claude-code
 fi
 
-nvim --headless "+Lazy! sync" +qa
+# Neovim
+# LAZY_DIR="$HOME/.local/share/nvim/lazy/lazy.nvim"
+# if [ ! -d "$LAZY_DIR" ]; then
+#   git clone --filter=blob:none https://github.com/folke/lazy.nvim.git "$LAZY_DIR"
+# fi
+
+# nvim --headless "+Lazy! sync" +qa
 
 # Go
 go install golang.org/x/tools/cmd/godoc@latest

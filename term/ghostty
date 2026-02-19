@@ -1,0 +1,21 @@
+# shell
+command = /opt/homebrew/bin/zsh
+shell-integration-features = no-cursor
+
+# cursor
+cursor-style = block
+cursor-style-blink = false
+
+# match vim/init.lua
+# background = 1e2022
+
+# fonts
+font-feature = -calt
+font-feature = -dlig
+font-feature = -liga
+
+# theme
+theme = Catppuccin Mocha
+
+# windows
+window-inherit-working-directory = false
