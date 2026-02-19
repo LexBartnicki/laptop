@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# new_monogame - Create new MonoGame project
+#
+# Creates a new MonoGame DesktopGL project with git
+#
+# Usage:
+#   new_monogame project_name
+
+set -e
+
+if [ -n "$1" ]; then
+  dotnet new mgdesktopgl -n "$1"
+  cd "$1"
+  dotnet tool restore
+  git init
+else
+  exit 0
+fi

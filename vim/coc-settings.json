@@ -1,4 +1,11 @@
 {
-  "tsserver.npm": "/opt/homebrew/bin/npm"
+  "tsserver.npm": "/opt/homebrew/bin/npm",
+  "languageserver": {
+    "csharp-ls": {
+      "command": "csharp-ls",
+      "filetypes": ["cs"],
+      "rootPatterns": ["*.sln", "*.csproj"]
+    }
+  }
 }
 

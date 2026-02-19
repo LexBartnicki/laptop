@@ -66,6 +66,7 @@ brew "yarn"
 brew "zellij"
 
 # Game development
+brew "freeimage"
 brew "sdl2"
 
 # Casks

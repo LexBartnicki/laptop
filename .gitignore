@@ -1,3 +1,5 @@
 shell/zshrc.local
 secrets.local
 languages.local
+frameworks.local
+.claude

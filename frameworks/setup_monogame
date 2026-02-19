@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# setup_monogame - Install MonoGame development tools
+#
+# Installs MonoGame templates, content pipeline tools,
+# and C# language server.
+#
+# Usage:
+#   setup_monogame
+
+set -e
+
+echo "Installing MonoGame templates..."
+dotnet new install MonoGame.Templates.CSharp
+
+echo "Installing MGCB content pipeline..."
+dotnet tool update -g dotnet-mgcb
+dotnet tool update -g dotnet-mgcb-editor-mac
+
+echo "Installing C# language server (csharp-ls)..."
+dotnet tool update -g csharp-ls
+
+echo "Installing C# formatter..."
+dotnet tool update -g csharpier
+
+echo "Done! Run 'new_monogame <name>' to create a project."

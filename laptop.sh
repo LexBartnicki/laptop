@@ -40,6 +40,13 @@ done
 
 # Create local configs if they don't exist
 touch "$LAPTOP"/shell/zshrc.local
+if [ ! -f "$LAPTOP/frameworks.local" ]; then
+  cat > "$LAPTOP/frameworks.local" << 'EOF'
+# Frameworks to install (one per line)
+# Available: monogame
+EOF
+fi
+
 if [ ! -f "$LAPTOP/languages.local" ]; then
   cat > "$LAPTOP/languages.local" << 'EOF'
 # Languages to install via asdf
@@ -242,3 +249,9 @@ go install golang.org/x/tools/gopls@latest
 
 # AI via CLI
 go install github.com/charmbracelet/mods@latest
+
+# Frameworks
+FRAMEWORKS=$(grep -v '^#' "$LAPTOP/frameworks.local" | grep -v '^$')
+for framework in $FRAMEWORKS; do
+  "$LAPTOP/frameworks/setup_$framework"
+done
