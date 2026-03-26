@@ -70,9 +70,11 @@ brew "sdl2"
 
 # Casks
 cask "1password-cli"
+cask "claude"
+cask "claude-code"
 cask "docker-desktop"
+cask "firefox"
 cask "ghostty"
+cask "google-chrome"
 cask "ngrok"
 cask "pgadmin4"
-cask "visual-studio-code"
-cask "warp"

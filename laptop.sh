@@ -60,6 +60,8 @@ if [ "$SKIP_BREW" = false ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
 
+  export PATH="$BREW/bin:$PATH"
+
   brew analytics off
   brew update-reset
   brew bundle --file="$LAPTOP/Brewfile"
@@ -68,8 +70,6 @@ if [ "$SKIP_BREW" = false ]; then
   brew autoremove
   brew cleanup
 fi
-
-export PATH="$BREW/bin:$PATH"
 
 # zsh
 update_shell() {
@@ -222,9 +222,6 @@ vim -u "$HOME/.vimrc" +PlugUpdate +PlugClean! +qa
 if [ "$SKIP_BREW" = false ]; then
   # Bash
   npm install -g bash-language-server
-
-  # Claude code
-  npm install -g @anthropic-ai/claude-code
 fi
 
 # Neovim
