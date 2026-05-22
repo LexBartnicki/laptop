@@ -7,7 +7,6 @@ alias b="bundle"
 alias ls="ls -lah"
 alias c="git create-branch"
 alias flush-cache="sudo killall -HUP mDNSResponder"
-alias m="rake db:migrate db:rollback && rake db:migrate db:test:prepare"
 alias mkdir="mkdir -p"
 alias path='echo $PATH | tr -s ":" "\n"'
 alias y='yazi'
