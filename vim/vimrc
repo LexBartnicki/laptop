@@ -109,6 +109,9 @@ augroup lastcursorposition
     \ endif
 augroup END
 
+" Let proto linter work in nested dirs
+let g:ale_proto_protoc_gen_lint_options = '-I definitions'
+
 " Lint with ALE
 augroup ale
   autocmd!
@@ -183,10 +186,27 @@ if version > 580
   endif
 endif
 
+" Use the terminal's true colors so catppuccin's exact hex values apply.
+" Without this, vim falls back to the colorscheme's xterm-256 approximations.
+if has('termguicolors') && ($COLORTERM ==# 'truecolor' || $COLORTERM ==# '24bit')
+  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+  set termguicolors
+endif
+
 silent! colorscheme catppuccin_mocha
 
 " Show all syntax groups
 " :so $VIMRUNTIME/syntax/hitest.vim
+
+" Override low-contrast highlights from catppuccin
+hi DiffAdd guifg=#CDD6F4 guibg=#2B4A3F
+hi DiffChange guifg=#CDD6F4 guibg=#2B3A5A
+hi DiffDelete guifg=#CDD6F4 guibg=#4A2B3A
+hi DiffText guifg=#CDD6F4 guibg=#3A4A6A gui=bold
+hi ErrorMsg guifg=#F38BA8 guibg=#3E2233 gui=bold
+hi Error guifg=#F38BA8 guibg=#3E2233 gui=bold
+hi Exception guifg=#f38ba8
 
 hi LineNr ctermbg=234
 hi SignColumn ctermbg=234
